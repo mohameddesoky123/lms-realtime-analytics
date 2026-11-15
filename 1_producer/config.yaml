@@ -1,0 +1,62 @@
+# Simulator configuration (Member 1). Values match the contract in the project plan (Section 4).
+courses: [CS101, DB201, AI301, NET210, SE330]
+modules_per_course: 6
+
+devices:            # weights (do not need to sum to 1)
+  mobile: 0.50
+  desktop: 0.30
+  tablet: 0.10
+  smart_tv: 0.10
+
+regions:
+  cairo: 0.25
+  giza: 0.15
+  alexandria: 0.12
+  delta: 0.15
+  upper_egypt: 0.15
+  gulf: 0.08
+  europe: 0.10
+
+traffic:
+  tick_delay_sec: [0.5, 3.0]      # real seconds between two events of one session
+  video_length_sec: [300, 540]    # simulated video length of one module
+  position_step_sec: [20, 40]     # video seconds that pass per tick (time is compressed)
+  wave_amplitude: 0.5             # active sessions oscillate +-50% around the target
+  wave_period_sec: 600
+
+behavior:
+  base_dropoff_per_tick: 0.01
+  pattern_dropoff:                # planted pattern (a): high drop-off in CS101-M03 around second 240
+    course: CS101
+    module: 3
+    from_sec: 210
+    to_sec: 270
+    per_tick: 0.35
+  pause_prob: 0.08
+  seek_prob: 0.04
+  quiz_prob: 0.60
+  max_modules_per_session: 3
+  start_module_max: 4             # a session starts at a random module in 1..4
+
+buffering:
+  base_prob_per_tick: 0.04
+  lognormal_median_ms: 800
+  lognormal_sigma: 0.6
+  slow_group:                     # planted pattern (b): mobile + upper_egypt is slower
+    device: mobile
+    region: upper_egypt
+    prob_multiplier: 3.0
+    duration_multiplier: 4.0
+
+dirty:                            # per-event probabilities (table 4.3). Scaled by --dirty-rate
+  null_key: 0.03                  # user_id or course_id becomes null
+  duplicate: 0.03                 # same event_id sent twice
+  type_case: 0.05                 # event_type in upper case / padded
+  epoch_time: 0.05                # event_time as epoch milliseconds (number)
+  text_case: 0.05                 # device / region with different case or spaces
+  out_of_range: 0.02              # negative position, buffer > 600000, score > 100
+
+late:                             # not an error: shows the watermark in Spark
+  rate: 0.02
+  min_sec: 30
+  max_sec: 90
